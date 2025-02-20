@@ -1,0 +1,6 @@
+name: LazyGui
+version: '1.0'
+main: me.ericdavis.lazyGui.LazyGui
+api-version: '1.21'
+authors: [ LazyGamer21 ]
+description: Library to Simplify Creating GUIs in Spigot Plugins
