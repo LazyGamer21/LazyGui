@@ -7,7 +7,7 @@ public class GuiManager {
 
     public GuiManager(JavaPlugin plugin)
     {
-        new ExampleMainPage(plugin);
+        //new ExampleMainPage(plugin);
     }
 
 }

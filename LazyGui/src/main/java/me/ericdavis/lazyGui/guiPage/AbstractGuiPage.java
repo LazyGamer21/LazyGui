@@ -26,6 +26,14 @@ public abstract class AbstractGuiPage implements InventoryHolder {
 
     HashMap<Integer, ItemStack> guiItems = new HashMap<>(); // a record of the items to create when opening this gui
 
+
+    //? >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+    //? HOW TO USE                                                 >>
+    //? extend this class to make a custom page                    >>
+    //? call the page's constructor when enabling the plugin       >>
+    //? >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+
+
     public AbstractGuiPage(JavaPlugin plugin, String pageId)
     {
         this.plugin = plugin;
@@ -33,7 +41,6 @@ public abstract class AbstractGuiPage implements InventoryHolder {
         this.rows = getRows();
 
         guiPages.put(pageId, this);
-        Bukkit.broadcastMessage("Enabled " + this.getDisplayName());
     }
 
     public void open(Player p)

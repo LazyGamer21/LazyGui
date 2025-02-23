@@ -19,6 +19,15 @@ public abstract class AbstractGuiItem extends ItemStack {
 
     public static HashMap<String, AbstractGuiItem> guiItems = new HashMap<>();
 
+
+    //? >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+    //? HOW TO USE                                   >>
+    //? extend this class to make a custom item      >>
+    //? call the item's constructor when using       >>
+    //? assignItem() in a custom gui page            >>
+    //? >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+
+
     public AbstractGuiItem(Material material, int customModelNumber, String itemId)
     {
         super(material);
