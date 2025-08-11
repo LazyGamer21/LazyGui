@@ -1,13 +1,11 @@
 package me.ericdavis.lazyGui.guiOther;
 
-import me.ericdavis.lazyGui.guiPage.exampleGui.ExampleMainPage;
-import org.bukkit.plugin.java.JavaPlugin;
+import me.ericdavis.lazyGui.guiPage.AbstractGuiPage;
+
+import java.util.HashMap;
 
 public class GuiManager {
 
-    public GuiManager(JavaPlugin plugin)
-    {
-        //new ExampleMainPage(plugin);
-    }
+    public static HashMap<String, AbstractGuiPage> guiPages = new HashMap<>();
 
 }

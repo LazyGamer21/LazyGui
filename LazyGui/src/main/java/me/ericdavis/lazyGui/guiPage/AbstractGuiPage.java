@@ -1,6 +1,7 @@
 package me.ericdavis.lazyGui.guiPage;
 
 import me.ericdavis.lazyGui.guiItem.AbstractGuiItem;
+import me.ericdavis.lazyGui.guiOther.GuiManager;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
@@ -8,6 +9,7 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.util.HashMap;
@@ -16,8 +18,6 @@ import java.util.Map;
 public abstract class AbstractGuiPage implements InventoryHolder {
 
     final JavaPlugin plugin;
-
-    public static final HashMap<String, AbstractGuiPage> guiPages = new HashMap<>();
 
     private static Inventory guiPage;
 
@@ -40,7 +40,7 @@ public abstract class AbstractGuiPage implements InventoryHolder {
         this.displayName = getDisplayName();
         this.rows = getRows();
 
-        guiPages.put(pageId, this);
+        GuiManager.guiPages.put(pageId, this);
     }
 
     public void open(Player p)
@@ -89,6 +89,14 @@ public abstract class AbstractGuiPage implements InventoryHolder {
 
     protected abstract int getRows();
 
-    public abstract void handleClick(InventoryClickEvent e);
+    public void handleClick(InventoryClickEvent e) {
+        if (e.getCurrentItem() == null) return;
+        ItemMeta meta = e.getCurrentItem().getItemMeta();
+        if (meta == null) return;
+        AbstractGuiItem customItem = AbstractGuiItem.getGuiItem(e.getCurrentItem());
+        if (customItem == null) return;
+
+        customItem.onClicked(e, this);
+    }
 
 }

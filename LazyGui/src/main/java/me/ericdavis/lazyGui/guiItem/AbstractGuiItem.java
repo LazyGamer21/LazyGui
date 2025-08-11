@@ -27,7 +27,6 @@ public abstract class AbstractGuiItem extends ItemStack {
     //? assignItem() in a custom gui page            >>
     //? >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
-
     public AbstractGuiItem(Material material, int customModelNumber, String itemId)
     {
         super(material);

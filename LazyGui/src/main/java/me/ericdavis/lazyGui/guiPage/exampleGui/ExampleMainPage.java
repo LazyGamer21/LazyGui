@@ -11,7 +11,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 public class ExampleMainPage extends AbstractGuiPage {
 
-    public static String pageId = "main";
+    public static String pageId = "example";
 
     public ExampleMainPage(JavaPlugin plugin) {
         super(plugin, pageId);
@@ -29,17 +29,6 @@ public class ExampleMainPage extends AbstractGuiPage {
     @Override
     protected int getRows() {
         return 6;
-    }
-
-    @Override
-    public void handleClick(InventoryClickEvent e) {
-        if (e.getCurrentItem() == null) return;
-        ItemMeta meta = e.getCurrentItem().getItemMeta();
-        if (meta == null) return;
-        AbstractGuiItem customItem = AbstractGuiItem.getGuiItem(e.getCurrentItem());
-        if (customItem == null) return;
-
-        customItem.onClicked(e, this);
     }
 
 }
