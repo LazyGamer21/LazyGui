@@ -1,6 +1,6 @@
 package me.ericdavis.lazygui;
 
-import me.ericdavis.lazygui.gui.GuiManager;
+import me.ericdavis.lazygui.test.GuiManager;
 import org.bukkit.plugin.java.JavaPlugin;
 
 public class LazyGui {

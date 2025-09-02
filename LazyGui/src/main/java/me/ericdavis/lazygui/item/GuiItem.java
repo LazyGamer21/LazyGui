@@ -1,6 +1,7 @@
 package me.ericdavis.lazygui.item;
 
-import me.ericdavis.lazygui.gui.AbstractGuiPage;
+import me.ericdavis.lazygui.test.AbstractGuiPage;
+import org.bukkit.Bukkit;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.ItemStack;
 

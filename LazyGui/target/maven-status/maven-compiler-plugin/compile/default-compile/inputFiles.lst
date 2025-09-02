@@ -1,7 +1,5 @@
-C:\Users\lazyg\Desktop\Coding\IntelliJProjects\LazyGui\LazyGui\src\main\java\me\ericdavis\lazyGui\guiItem\AbstractGuiItem.java
-C:\Users\lazyg\Desktop\Coding\IntelliJProjects\LazyGui\LazyGui\src\main\java\me\ericdavis\lazyGui\guiItem\exampleGui\ExampleItem.java
-C:\Users\lazyg\Desktop\Coding\IntelliJProjects\LazyGui\LazyGui\src\main\java\me\ericdavis\lazyGui\guiOther\GuiListener.java
-C:\Users\lazyg\Desktop\Coding\IntelliJProjects\LazyGui\LazyGui\src\main\java\me\ericdavis\lazyGui\guiOther\GuiManager.java
-C:\Users\lazyg\Desktop\Coding\IntelliJProjects\LazyGui\LazyGui\src\main\java\me\ericdavis\lazyGui\guiPage\AbstractGuiPage.java
-C:\Users\lazyg\Desktop\Coding\IntelliJProjects\LazyGui\LazyGui\src\main\java\me\ericdavis\lazyGui\guiPage\exampleGui\ExampleMainPage.java
-C:\Users\lazyg\Desktop\Coding\IntelliJProjects\LazyGui\LazyGui\src\main\java\me\ericdavis\lazyGui\LazyGui.java
+C:\Users\lazyg\Desktop\Coding\IntelliJProjects\LazyGui\LazyGui\src\main\java\me\ericdavis\lazygui\item\GuiItem.java
+C:\Users\lazyg\Desktop\Coding\IntelliJProjects\LazyGui\LazyGui\src\main\java\me\ericdavis\lazygui\item\ItemBuilder.java
+C:\Users\lazyg\Desktop\Coding\IntelliJProjects\LazyGui\LazyGui\src\main\java\me\ericdavis\lazygui\LazyGui.java
+C:\Users\lazyg\Desktop\Coding\IntelliJProjects\LazyGui\LazyGui\src\main\java\me\ericdavis\lazygui\test\AbstractGuiPage.java
+C:\Users\lazyg\Desktop\Coding\IntelliJProjects\LazyGui\LazyGui\src\main\java\me\ericdavis\lazygui\test\GuiManager.java
