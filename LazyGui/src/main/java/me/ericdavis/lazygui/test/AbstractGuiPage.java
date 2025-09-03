@@ -24,6 +24,7 @@ public abstract class AbstractGuiPage implements InventoryHolder {
     private String parentPageId = null;
     private final boolean fillBorder;
     private final boolean autoGenBackButton;
+    private final boolean buttonsFollowListPages;
 
     private int currentPage = 0;
     private List<GuiItem> itemsToShow;
@@ -44,13 +45,14 @@ public abstract class AbstractGuiPage implements InventoryHolder {
      * @param fillBorder will fill empty border tiles with glass panes
      * @implNote Recommendation: Create a public static String for the pageIdentifier to make opening pages easier
      */
-    public AbstractGuiPage(JavaPlugin plugin, boolean fillBorder)
+    public AbstractGuiPage(JavaPlugin plugin, boolean fillBorder, boolean buttonsFollowListPages)
     {
         this.plugin = plugin;
         this.displayName = getDisplayName();
         this.rows = getRows();
         this.fillBorder = fillBorder;
         this.autoGenBackButton = false;
+        this.buttonsFollowListPages = buttonsFollowListPages;
 
         GuiManager.getInstance().registerPage(this, getPageIdentifier());
 
@@ -64,7 +66,7 @@ public abstract class AbstractGuiPage implements InventoryHolder {
      * @param parentPageId allows openParentPage for easier access to parent page
      * @param autoGenBackButton
      */
-    public AbstractGuiPage(JavaPlugin plugin, boolean fillBorder, String parentPageId, boolean autoGenBackButton)
+    public AbstractGuiPage(JavaPlugin plugin, boolean fillBorder, boolean buttonsFollowListPages, String parentPageId, boolean autoGenBackButton)
     {
         this.plugin = plugin;
         this.displayName = getDisplayName();
@@ -72,6 +74,7 @@ public abstract class AbstractGuiPage implements InventoryHolder {
         this.fillBorder = fillBorder;
         this.autoGenBackButton = autoGenBackButton;
         this.parentPageId = parentPageId;
+        this.buttonsFollowListPages = buttonsFollowListPages;
 
         GuiManager.getInstance().registerPage(this, getPageIdentifier());
 
@@ -95,6 +98,8 @@ public abstract class AbstractGuiPage implements InventoryHolder {
     public void open(Player player) {
         player.closeInventory();
 
+        currentPage = 0;
+        refreshInventory();
         setAssignedItems();
 
         Bukkit.getScheduler().runTaskLater(plugin, () -> player.openInventory(guiPage), 1);
@@ -147,12 +152,15 @@ public abstract class AbstractGuiPage implements InventoryHolder {
     public void refreshInventory() {
         // Clear existing items
         this.guiItems.clear();
+        guiPage.clear();
 
         setAssignedItems();
+
+        Bukkit.broadcastMessage("current page: " + currentPage);
     }
 
     private void setAssignedItems() {
-        assignItems();
+        if (currentPage == 0 || buttonsFollowListPages) assignItems();
 
         if (fillBorder) fillBorder();
 
@@ -173,45 +181,50 @@ public abstract class AbstractGuiPage implements InventoryHolder {
 
         // Now handle the "listed" items that should page
         List<GuiItem> listed = getListedButtons();
-        if (listed != null && !listed.isEmpty()) {
-            // find all empty slots
-            List<Integer> emptySlots = new java.util.ArrayList<>();
-            for (int i = 0; i < guiPage.getSize(); i++) {
-                if (isEmpty(guiPage, i)) {
-                    emptySlots.add(i);
-                }
+
+        if (listed == null || listed.isEmpty()) return;
+
+        // find all empty slots
+        List<Integer> emptySlots = new java.util.ArrayList<>();
+        for (int i = 0; i < guiPage.getSize(); i++) {
+            if (isEmpty(guiPage, i)) {
+                emptySlots.add(i);
             }
+        }
 
-            int openSlots = emptySlots.size();
-            int startIndex = currentPage * openSlots;
-            int endIndex = Math.min(startIndex + openSlots, listed.size());
+        int openSlots = emptySlots.size();
+        int startIndex = currentPage * openSlots;
+        int endIndex = Math.min(startIndex + openSlots, listed.size());
 
-            List<GuiItem> pageItems = listed.subList(startIndex, endIndex);
+        List<GuiItem> pageItems = listed.subList(startIndex, endIndex);
 
-            // assign the listed items into the empty slots
-            for (int i = 0; i < pageItems.size(); i++) {
-                int slot = emptySlots.get(i);
-                assignItem(slot, pageItems.get(i));
-            }
+        // assign the listed items into the empty slots
+        for (int i = 0; i < pageItems.size(); i++) {
+            int slot = emptySlots.get(i);
+            GuiItem item = pageItems.get(i);
+            assignItem(slot, item);
+            guiPage.setItem(slot, item.getItem()); // <- update inventory right away
+        }
 
-            // Navigation buttons (if more than one page)
-            if (endIndex < listed.size()) {
-                assignItem(guiPage.getSize() - 3, new GuiItem(Material.ARROW, e -> {
-                    currentPage++;
-                    refreshInventory();
-                    Player player = (Player) e.getWhoClicked();
-                    open(player);
-                }).setName(ChatColor.GREEN + "Next Page").build());
-            }
+        // Navigation buttons
+        if (endIndex < listed.size()) {
+            GuiItem nextBtn = new GuiItem(Material.ARROW, e -> {
+                currentPage++;
+                refreshInventory();
+            }).setName(ChatColor.GREEN + "Next Page").build();
 
-            if (currentPage > 0) {
-                assignItem(guiPage.getSize() - 7, new GuiItem(Material.ARROW, e -> {
-                    currentPage--;
-                    refreshInventory();
-                    Player player = (Player) e.getWhoClicked();
-                    open(player);
-                }).setName(ChatColor.RED + "Previous Page").build());
-            }
+            assignItem(guiPage.getSize() - 3, nextBtn);
+            guiPage.setItem(guiPage.getSize() - 3, nextBtn.getItem()); // <- add this
+        }
+
+        if (currentPage > 0) {
+            GuiItem prevBtn = new GuiItem(Material.ARROW, e -> {
+                currentPage--;
+                refreshInventory();
+            }).setName(ChatColor.RED + "Previous Page").build();
+
+            assignItem(guiPage.getSize() - 7, prevBtn);
+            guiPage.setItem(guiPage.getSize() - 7, prevBtn.getItem()); // <- add this
         }
     }
 
