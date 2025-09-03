@@ -1,7 +1,6 @@
 package me.ericdavis.lazygui.test;
 
 import me.ericdavis.lazygui.item.GuiItem;
-import me.ericdavis.lazygui.item.ItemBuilder;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
@@ -32,8 +31,6 @@ public abstract class AbstractGuiPage implements InventoryHolder {
     protected Material borderMaterial = Material.GRAY_STAINED_GLASS_PANE;
 
     private final HashMap<Integer, GuiItem> guiItems = new HashMap<>();
-
-    protected ItemStack itemToAssign;
 
     //? >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
     //? HOW TO USE                                                 >>
@@ -125,9 +122,8 @@ public abstract class AbstractGuiPage implements InventoryHolder {
      *
      * @param slot
      * @param item
-     * @implNote This called in the constructor {@link GuiItem} - To use this create new {@link GuiItem}s in assignItems
      */
-    public void assignItem(int slot, GuiItem item) {
+    protected void assignItem(int slot, GuiItem item) {
         if (slot >= rows * 9)
         {
             Bukkit.getLogger().warning("Attempted to assign a GUI item to a slot that doesn't exist! Item: " + displayName);
@@ -166,14 +162,13 @@ public abstract class AbstractGuiPage implements InventoryHolder {
         if (fillBorder) fillBorder();
 
         if (autoGenBackButton && parentPageId != null) {
-            itemToAssign = new ItemBuilder(Material.BARRIER)
-                    .setName(ChatColor.GRAY + "Previous Page")
-                    .build();
-            new GuiItem(this, 46, e -> {
+
+            assignItem(46, new GuiItem(Material.BARRIER, e -> {
                 if (!(e.getWhoClicked() instanceof Player)) return;
                 Player player = (Player) e.getWhoClicked();
                 openParentPage(player);
-            });
+            }).setName(ChatColor.GRAY + "Previous Page").build());
+
         }
 
         for (Map.Entry<Integer, GuiItem> entry : guiItems.entrySet())
@@ -183,13 +178,7 @@ public abstract class AbstractGuiPage implements InventoryHolder {
 
         if (getListedButtons() != null) {
             for (GuiItem item : getListedButtons()) {
-                int slot = guiPage.firstEmpty();
-                if (slot == -1) {
-                    //! all slots full so go to next page
-                    Bukkit.broadcastMessage("all slots full so go to next page");
-                    return;
-                }
-                assignItem(slot, item);
+                // do stuff
             }
         }
     }
@@ -249,10 +238,6 @@ public abstract class AbstractGuiPage implements InventoryHolder {
         if (customItem == null) return;
 
         customItem.onClick(e);
-    }
-
-    public ItemStack getItemToAssign() {
-        return this.itemToAssign;
     }
 
 }
