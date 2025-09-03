@@ -12,6 +12,11 @@ public class GuiItem {
     private final ItemStack item;
     private final Consumer<InventoryClickEvent> action;
 
+    public GuiItem(AbstractGuiPage page, Consumer<InventoryClickEvent> action) {
+        this.item = page.getItemToAssign();
+        this.action = action;
+    }
+
     public GuiItem(AbstractGuiPage page, Integer slot, Consumer<InventoryClickEvent> action) {
         page.assignItem(slot, this);
         this.item = page.getItemToAssign();

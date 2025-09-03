@@ -16,7 +16,6 @@ import org.bukkit.plugin.java.JavaPlugin;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Function;
 
 public abstract class AbstractGuiPage implements InventoryHolder {
 
@@ -29,12 +28,6 @@ public abstract class AbstractGuiPage implements InventoryHolder {
     private final boolean fillBorder;
     private final boolean updatingPage;
     private final boolean autoGenBackButton;
-
-    private final boolean isListed;
-    private List<?> listItems; // The list of items to display
-    private Function<Object, GuiItem> itemGenerator; // Function to create GuiItems from list items
-    private int listStartSlot = 10; // Default starting slot for list items (row 2, col 2)
-    private int itemsPerPage = 28; // Default items that can fit in a 6-row inventory
 
     protected Material borderMaterial = Material.GRAY_STAINED_GLASS_PANE;
 
@@ -53,17 +46,15 @@ public abstract class AbstractGuiPage implements InventoryHolder {
      * @param plugin Reference to the main plugin class
      * @param fillBorder will fill empty border tiles with glass panes
      * @param updatingPage will run assignItems() every time the page is opened to allow for variable buttons
-     * @param isListed
      * @implNote Recommendation: Create a public static String for the pageIdentifier to make opening pages easier
      */
-    public AbstractGuiPage(JavaPlugin plugin, boolean fillBorder, boolean updatingPage, boolean isListed)
+    public AbstractGuiPage(JavaPlugin plugin, boolean fillBorder, boolean updatingPage)
     {
         this.plugin = plugin;
         this.displayName = getDisplayName();
         this.rows = getRows();
         this.fillBorder = fillBorder;
         this.updatingPage = updatingPage;
-        this.isListed = isListed;
         this.autoGenBackButton = false;
 
         GuiManager.getInstance().registerPage(this, getPageIdentifier());
@@ -76,18 +67,16 @@ public abstract class AbstractGuiPage implements InventoryHolder {
      * @param plugin Reference to the main plugin class
      * @param fillBorder will fill empty border tiles with glass panes
      * @param updatingPage will run assignItems() every time the page is opened to allow for variable buttons
-     * @param isListed
      * @param parentPageId allows openParentPage for easier access to parent page
      * @param autoGenBackButton
      */
-    public AbstractGuiPage(JavaPlugin plugin, boolean fillBorder, boolean updatingPage, boolean isListed, String parentPageId, boolean autoGenBackButton)
+    public AbstractGuiPage(JavaPlugin plugin, boolean fillBorder, boolean updatingPage, String parentPageId, boolean autoGenBackButton)
     {
         this.plugin = plugin;
         this.displayName = getDisplayName();
         this.rows = getRows();
         this.fillBorder = fillBorder;
         this.updatingPage = updatingPage;
-        this.isListed = isListed;
         this.autoGenBackButton = autoGenBackButton;
         this.parentPageId = parentPageId;
 
@@ -103,6 +92,8 @@ public abstract class AbstractGuiPage implements InventoryHolder {
     protected abstract void assignItems();
 
     public abstract String getPageIdentifier();
+
+    protected abstract List<GuiItem> getListedButtons();
 
     /**
      *
@@ -136,8 +127,7 @@ public abstract class AbstractGuiPage implements InventoryHolder {
      * @param item
      * @implNote This called in the constructor {@link GuiItem} - To use this create new {@link GuiItem}s in assignItems
      */
-    public void assignItem(int slot, GuiItem item)
-    {
+    public void assignItem(int slot, GuiItem item) {
         if (slot >= rows * 9)
         {
             Bukkit.getLogger().warning("Attempted to assign a GUI item to a slot that doesn't exist! Item: " + displayName);
@@ -150,8 +140,7 @@ public abstract class AbstractGuiPage implements InventoryHolder {
     /**
      * Creates the {@link Inventory} for this page once all items have been assigned
      */
-    private void createInventory()
-    {
+    private void createInventory() {
         if (rows < 1 || rows > 6)
         {
             Bukkit.getLogger().severe("GUI rows must be 1-6 - rows is currently set to " + rows + " for AbstractGuiPage " + ChatColor.stripColor(displayName));
@@ -174,21 +163,13 @@ public abstract class AbstractGuiPage implements InventoryHolder {
     private void assignItemsHelper() {
         assignItems();
 
-        // Handle listed content
-        if (isListed && listItems != null && itemGenerator != null) {
-            generateListedItems();
-        }
-
         if (fillBorder) fillBorder();
 
         if (autoGenBackButton && parentPageId != null) {
-            int slot;
-            if (fillBorder) slot = 37;
-            else slot = 45;
-            itemToAssign = new ItemBuilder(Material.OAK_LOG)
+            itemToAssign = new ItemBuilder(Material.BARRIER)
                     .setName(ChatColor.GRAY + "Previous Page")
                     .build();
-            new GuiItem(this, slot, e -> {
+            new GuiItem(this, 46, e -> {
                 if (!(e.getWhoClicked() instanceof Player)) return;
                 Player player = (Player) e.getWhoClicked();
                 openParentPage(player);
@@ -198,6 +179,18 @@ public abstract class AbstractGuiPage implements InventoryHolder {
         for (Map.Entry<Integer, GuiItem> entry : guiItems.entrySet())
         {
             guiPage.setItem(entry.getKey(), entry.getValue().getItem());
+        }
+
+        if (getListedButtons() != null) {
+            for (GuiItem item : getListedButtons()) {
+                int slot = guiPage.firstEmpty();
+                if (slot == -1) {
+                    //! all slots full so go to next page
+                    Bukkit.broadcastMessage("all slots full so go to next page");
+                    return;
+                }
+                assignItem(slot, item);
+            }
         }
     }
 
@@ -258,92 +251,8 @@ public abstract class AbstractGuiPage implements InventoryHolder {
         customItem.onClick(e);
     }
 
-    // Make guiItems accessible
-    public HashMap<Integer, GuiItem> getGuiItems() {
-        return this.guiItems;
-    }
-
-    // Make fillBorder accessible for refresh
-    public void refreshBorder(Inventory inventory) {
-        if (this.fillBorder) {
-            this.fillBorder();
-        }
-    }
-
-    /**
-     * Set the list of items to display and the function to generate GUI items from them
-     * @param listItems The list of objects to display
-     * @param itemGenerator Function that converts list items to GuiItems
-     */
-    public void setListItems(List<?> listItems, Function<Object, GuiItem> itemGenerator) {
-        this.listItems = listItems;
-        this.itemGenerator = itemGenerator;
-        calculateItemsPerPage();
-    }
-
-    public void setListStartSlot(int listStartSlot) {
-        this.listStartSlot = listStartSlot;
-        calculateItemsPerPage();
-    }
-
-    /**
-     * Get the current page of list items (for pagination)
-     */
-    public List<?> getCurrentPageItems(int page) {
-        if (listItems == null) return List.of();
-
-        int start = page * itemsPerPage;
-        int end = Math.min(start + itemsPerPage, listItems.size());
-
-        if (start >= listItems.size()) return List.of();
-
-        return listItems.subList(start, end);
-    }
-
-    /**
-     * Calculate how many items can fit on the page based on inventory size and fillBorder
-     */
-    private void calculateItemsPerPage() {
-        if (fillBorder) {
-            // Account for border - items can only be placed in the center area
-            this.itemsPerPage = (rows - 2) * 7; // (rows - top/bottom border) * (9 - left/right border)
-        } else {
-            // Full inventory available
-            this.itemsPerPage = rows * 9;
-        }
-    }
-
-    /**
-     * Generate GUI items from the list
-     */
-    private void generateListedItems() {
-        int currentSlot = listStartSlot;
-
-        for (Object item : listItems) {
-            if (currentSlot >= rows * 9) break; // Don't exceed inventory size
-
-            GuiItem guiItem = itemGenerator.apply(item);
-            assignItem(currentSlot, guiItem);
-
-            currentSlot++;
-
-            // Skip border slots if fillBorder is enabled
-            if (fillBorder) {
-                int row = currentSlot / 9;
-                int col = currentSlot % 9;
-
-                // If we're at the right border, move to next row
-                if (col == 8) {
-                    currentSlot += 2; // Skip left border of next row
-                }
-            }
-        }
-    }
-
-    public Inventory getInventory() {return guiPage;}
-
     public ItemStack getItemToAssign() {
-        return itemToAssign;
+        return this.itemToAssign;
     }
 
 }
