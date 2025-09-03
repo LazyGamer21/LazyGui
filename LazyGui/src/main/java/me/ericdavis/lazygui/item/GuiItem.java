@@ -1,7 +1,5 @@
 package me.ericdavis.lazygui.item;
 
-import me.ericdavis.lazygui.test.AbstractGuiPage;
-import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;

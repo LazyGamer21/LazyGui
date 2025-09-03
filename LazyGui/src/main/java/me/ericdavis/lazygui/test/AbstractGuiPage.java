@@ -64,7 +64,7 @@ public abstract class AbstractGuiPage implements InventoryHolder {
      * @param plugin Reference to the main plugin class
      * @param fillBorder will fill empty border tiles with glass panes
      * @param parentPageId allows openParentPage for easier access to parent page
-     * @param autoGenBackButton
+     * @param autoGenBackButton will automatically generate the back button to return to the parent page
      */
     public AbstractGuiPage(JavaPlugin plugin, boolean fillBorder, boolean buttonsFollowListPages, String parentPageId, boolean autoGenBackButton)
     {
@@ -120,8 +120,8 @@ public abstract class AbstractGuiPage implements InventoryHolder {
 
     /**
      *
-     * @param slot
-     * @param item
+     * @param slot the slot to assign the item to
+     * @param item the item to assign
      */
     protected void assignItem(int slot, GuiItem item) {
         if (slot >= rows * 9)
