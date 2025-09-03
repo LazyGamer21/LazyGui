@@ -158,6 +158,10 @@ public abstract class AbstractGuiPage implements InventoryHolder {
     }
 
     private void setAssignedItems() {
+        // Clear everything first
+        guiItems.clear();
+        guiPage.clear();
+
         if (currentPage == 0 || buttonsFollowListPages) assignItems();
 
         if (fillBorder) fillBorder();
