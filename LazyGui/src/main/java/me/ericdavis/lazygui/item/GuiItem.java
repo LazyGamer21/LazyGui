@@ -4,9 +4,11 @@ import me.ericdavis.lazygui.test.AbstractGuiPage;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
+import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.inventory.meta.SkullMeta;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -56,6 +58,16 @@ public class GuiItem {
 
     public GuiItem setAmount(int amount) {
         item.setAmount(amount);
+        return this;
+    }
+
+    public GuiItem setSkullOwner(Player target) {
+        if (!(item.getType() == Material.PLAYER_HEAD || item.getType() == Material.PLAYER_WALL_HEAD)) {
+            throw new IllegalStateException("Item is not a player head!");
+        }
+
+        SkullMeta skullMeta = (SkullMeta) meta;
+        skullMeta.setOwningPlayer(target);
         return this;
     }
 
