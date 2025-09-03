@@ -33,6 +33,7 @@ public class GuiItem {
 
     public GuiItem setName(String name) {
         meta.setDisplayName(ChatColor.translateAlternateColorCodes('&', name));
+        item.setItemMeta(meta);
         return this;
     }
 
@@ -42,6 +43,7 @@ public class GuiItem {
             coloredLore.add(ChatColor.translateAlternateColorCodes('&', line));
         }
         meta.setLore(coloredLore);
+        item.setItemMeta(meta);
         return this;
     }
 
@@ -51,11 +53,13 @@ public class GuiItem {
             coloredLore.add(ChatColor.translateAlternateColorCodes('&', line));
         }
         meta.setLore(coloredLore);
+        item.setItemMeta(meta);
         return this;
     }
 
     public GuiItem setAmount(int amount) {
         item.setAmount(amount);
+        item.setItemMeta(meta);
         return this;
     }
 
@@ -66,10 +70,6 @@ public class GuiItem {
 
         SkullMeta skullMeta = (SkullMeta) meta;
         skullMeta.setOwningPlayer(target);
-        return this;
-    }
-
-    public GuiItem build() {
         item.setItemMeta(meta);
         return this;
     }
