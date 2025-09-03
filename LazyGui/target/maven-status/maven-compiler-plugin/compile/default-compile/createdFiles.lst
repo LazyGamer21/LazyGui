@@ -1,5 +1,4 @@
 me\ericdavis\lazygui\LazyGui.class
 me\ericdavis\lazygui\test\GuiManager.class
 me\ericdavis\lazygui\item\GuiItem.class
-me\ericdavis\lazygui\item\ItemBuilder.class
 me\ericdavis\lazygui\test\AbstractGuiPage.class
