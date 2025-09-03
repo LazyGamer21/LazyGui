@@ -155,8 +155,6 @@ public abstract class AbstractGuiPage implements InventoryHolder {
         guiPage.clear();
 
         setAssignedItems();
-
-        Bukkit.broadcastMessage("current page: " + currentPage);
     }
 
     private void setAssignedItems() {
