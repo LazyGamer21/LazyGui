@@ -158,7 +158,7 @@ public abstract class AbstractGuiPage implements InventoryHolder {
 
         if (autoGenBackButton && parentPageId != null) {
 
-            assignItem(guiPage.getSize() - 6, new GuiItem(Material.BARRIER, e -> {
+            assignItem(guiPage.getSize() - 5, new GuiItem(Material.BARRIER, e -> {
                 if (!(e.getWhoClicked() instanceof Player)) return;
                 Player player = (Player) e.getWhoClicked();
                 openParentPage(player);
@@ -196,7 +196,7 @@ public abstract class AbstractGuiPage implements InventoryHolder {
 
             // Navigation buttons (if more than one page)
             if (endIndex < listed.size()) {
-                assignItem(guiPage.getSize() - 1, new GuiItem(Material.ARROW, e -> {
+                assignItem(guiPage.getSize() - 3, new GuiItem(Material.ARROW, e -> {
                     currentPage++;
                     refreshInventory();
                     Player player = (Player) e.getWhoClicked();
@@ -205,7 +205,7 @@ public abstract class AbstractGuiPage implements InventoryHolder {
             }
 
             if (currentPage > 0) {
-                assignItem(guiPage.getSize() - 9, new GuiItem(Material.ARROW, e -> {
+                assignItem(guiPage.getSize() - 7, new GuiItem(Material.ARROW, e -> {
                     currentPage--;
                     refreshInventory();
                     Player player = (Player) e.getWhoClicked();
