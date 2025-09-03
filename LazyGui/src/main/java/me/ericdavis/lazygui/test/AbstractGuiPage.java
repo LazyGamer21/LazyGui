@@ -172,7 +172,7 @@ public abstract class AbstractGuiPage implements InventoryHolder {
                 if (!(e.getWhoClicked() instanceof Player)) return;
                 Player player = (Player) e.getWhoClicked();
                 openParentPage(player);
-            }).setName(ChatColor.GRAY + "Previous Page").build());
+            }).setName(ChatColor.GRAY + "Previous Page"));
 
         }
 
@@ -213,7 +213,7 @@ public abstract class AbstractGuiPage implements InventoryHolder {
             GuiItem nextBtn = new GuiItem(Material.ARROW, e -> {
                 currentPage++;
                 refreshInventory();
-            }).setName(ChatColor.GREEN + "Next Page").build();
+            }).setName(ChatColor.GREEN + "Next Page");
 
             assignItem(guiPage.getSize() - 3, nextBtn);
             guiPage.setItem(guiPage.getSize() - 3, nextBtn.getItem()); // <- add this
@@ -223,7 +223,7 @@ public abstract class AbstractGuiPage implements InventoryHolder {
             GuiItem prevBtn = new GuiItem(Material.ARROW, e -> {
                 currentPage--;
                 refreshInventory();
-            }).setName(ChatColor.RED + "Previous Page").build();
+            }).setName(ChatColor.RED + "Previous Page");
 
             assignItem(guiPage.getSize() - 7, prevBtn);
             guiPage.setItem(guiPage.getSize() - 7, prevBtn.getItem()); // <- add this
