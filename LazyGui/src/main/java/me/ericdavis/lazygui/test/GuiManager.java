@@ -5,6 +5,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.inventory.InventoryHolder;
 
 import java.util.HashMap;
 
@@ -60,13 +61,15 @@ public class GuiManager implements Listener {
 
                 if (pageToOpen == null) continue;
 
-                if (!(player.getOpenInventory().getTopInventory().getHolder() instanceof AbstractGuiPage)) continue;
+                InventoryHolder inventoryHolder = player.getOpenInventory().getTopInventory().getHolder();
 
-                AbstractGuiPage openPage = (AbstractGuiPage) player.getOpenInventory().getTopInventory().getHolder();
+                if (!(inventoryHolder instanceof AbstractGuiPage)) continue;
+                AbstractGuiPage openPage = (AbstractGuiPage) inventoryHolder;
+
                 if (!openPage.getPageIdentifier().equalsIgnoreCase(pageToOpen.getPageIdentifier())) continue;
 
                 // Smooth refresh without closing/reopening
-                openPage.refreshInventory();
+                openPage.refreshInventory(player.getUniqueId());
             }
         }
     }

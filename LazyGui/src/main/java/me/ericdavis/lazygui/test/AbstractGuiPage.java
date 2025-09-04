@@ -18,20 +18,18 @@ public abstract class AbstractGuiPage implements InventoryHolder {
 
     final JavaPlugin plugin;
 
-    private final String displayName;
-    private final int rows;
-    private Inventory guiPage;
+    private String displayName;
+    private int rows;
     private String parentPageId = null;
     private final boolean fillBorder;
     private final boolean autoGenBackButton;
     private final boolean buttonsFollowListPages;
 
-    private int currentPage = 0;
-    private List<GuiItem> itemsToShow;
-
     protected Material borderMaterial = Material.GRAY_STAINED_GLASS_PANE;
 
+    private final HashMap<UUID, Integer> currentPages = new HashMap<>();
     private final HashMap<Integer, GuiItem> guiItems = new HashMap<>();
+    private final HashMap<UUID, Inventory> guiPages = new HashMap<>();
 
     //? >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
     //? HOW TO USE                                                 >>
@@ -55,8 +53,6 @@ public abstract class AbstractGuiPage implements InventoryHolder {
         this.buttonsFollowListPages = buttonsFollowListPages;
 
         GuiManager.getInstance().registerPage(this, getPageIdentifier());
-
-        createInventory();
     }
 
     /**
@@ -77,8 +73,6 @@ public abstract class AbstractGuiPage implements InventoryHolder {
         this.buttonsFollowListPages = buttonsFollowListPages;
 
         GuiManager.getInstance().registerPage(this, getPageIdentifier());
-
-        createInventory();
     }
 
     protected abstract String getDisplayName();
@@ -97,12 +91,16 @@ public abstract class AbstractGuiPage implements InventoryHolder {
      */
     public void open(Player player) {
         player.closeInventory();
+        UUID playerId = player.getUniqueId();
 
-        currentPage = 0;
-        refreshInventory();
-        setAssignedItems();
+        currentPages.put(playerId, 0);
+        this.displayName = getDisplayName();
+        this.rows = getRows();
 
-        Bukkit.getScheduler().runTaskLater(plugin, () -> player.openInventory(guiPage), 1);
+        createInventory(playerId);
+        refreshInventory(playerId);
+
+        Bukkit.getScheduler().runTaskLater(plugin, () -> player.openInventory(guiPages.get(playerId)), 1);
     }
 
     /**
@@ -136,39 +134,40 @@ public abstract class AbstractGuiPage implements InventoryHolder {
     /**
      * Creates the {@link Inventory} for this page once all items have been assigned
      */
-    private void createInventory() {
+    private void createInventory(UUID playerId) {
         if (rows < 1 || rows > 6)
         {
             Bukkit.getLogger().severe("GUI rows must be 1-6 - rows is currently set to " + rows + " for AbstractGuiPage " + ChatColor.stripColor(displayName));
             return;
         }
 
-        if (guiPage == null) guiPage = Bukkit.createInventory(this, rows * 9, displayName);
-
-        setAssignedItems();
+        guiPages.put(playerId, Bukkit.createInventory(this, rows * 9, displayName));
     }
 
     // Add a method to refresh the inventory smoothly
-    public void refreshInventory() {
+    public void refreshInventory(UUID playerId) {
         // Clear existing items
         this.guiItems.clear();
-        guiPage.clear();
+        guiPages.get(playerId).clear();
 
-        setAssignedItems();
+        setAssignedItems(playerId);
     }
 
-    private void setAssignedItems() {
+    private void setAssignedItems(UUID playerId) {
         // Clear everything first
         guiItems.clear();
-        guiPage.clear();
+        guiPages.get(playerId).clear();
 
-        if (currentPage == 0 || buttonsFollowListPages) assignItems();
+        if (currentPages.get(playerId) == 0 || buttonsFollowListPages) assignItems();
 
-        if (fillBorder) fillBorder();
+        if (fillBorder) fillBorder(guiPages.get(playerId));
+
+        Inventory playerPage = guiPages.get(playerId);
+        int currentPage = currentPages.get(playerId);
 
         if (autoGenBackButton && parentPageId != null) {
 
-            assignItem(guiPage.getSize() - 5, new GuiItem(Material.BARRIER, e -> {
+            assignItem(playerPage.getSize() - 5, new GuiItem(Material.BARRIER, e -> {
                 if (!(e.getWhoClicked() instanceof Player)) return;
                 Player player = (Player) e.getWhoClicked();
                 openParentPage(player);
@@ -178,7 +177,7 @@ public abstract class AbstractGuiPage implements InventoryHolder {
 
         for (Map.Entry<Integer, GuiItem> entry : guiItems.entrySet())
         {
-            guiPage.setItem(entry.getKey(), entry.getValue().getItem());
+            playerPage.setItem(entry.getKey(), entry.getValue().getItem());
         }
 
         // Now handle the "listed" items that should page
@@ -188,8 +187,8 @@ public abstract class AbstractGuiPage implements InventoryHolder {
 
         // find all empty slots
         List<Integer> emptySlots = new java.util.ArrayList<>();
-        for (int i = 0; i < guiPage.getSize(); i++) {
-            if (isEmpty(guiPage, i)) {
+        for (int i = 0; i < playerPage.getSize(); i++) {
+            if (isEmpty(playerPage, i)) {
                 emptySlots.add(i);
             }
         }
@@ -205,36 +204,38 @@ public abstract class AbstractGuiPage implements InventoryHolder {
             int slot = emptySlots.get(i);
             GuiItem item = pageItems.get(i);
             assignItem(slot, item);
-            guiPage.setItem(slot, item.getItem()); // <- update inventory right away
+            playerPage.setItem(slot, item.getItem()); // <- update inventory right away
         }
 
         // Navigation buttons
         if (endIndex < listed.size()) {
             GuiItem nextBtn = new GuiItem(Material.ARROW, e -> {
-                currentPage++;
-                refreshInventory();
+                currentPages.put(playerId, currentPage + 1);
+                refreshInventory(playerId);
             }).setName(ChatColor.GREEN + "Next Page");
 
-            assignItem(guiPage.getSize() - 3, nextBtn);
-            guiPage.setItem(guiPage.getSize() - 3, nextBtn.getItem()); // <- add this
+            assignItem(playerPage.getSize() - 3, nextBtn);
+            playerPage.setItem(playerPage.getSize() - 3, nextBtn.getItem()); // <- add this
         }
 
         if (currentPage > 0) {
             GuiItem prevBtn = new GuiItem(Material.ARROW, e -> {
-                currentPage--;
-                refreshInventory();
+                currentPages.put(playerId, currentPage - 1);
+                refreshInventory(playerId);
             }).setName(ChatColor.RED + "Previous Page");
 
-            assignItem(guiPage.getSize() - 7, prevBtn);
-            guiPage.setItem(guiPage.getSize() - 7, prevBtn.getItem()); // <- add this
+            assignItem(playerPage.getSize() - 7, prevBtn);
+            playerPage.setItem(playerPage.getSize() - 7, prevBtn.getItem()); // <- add this
         }
     }
 
     /**
      * @implNote Run in createInventory(), to enable set fillBorder to true
      */
-    private void fillBorder() {
-        int size = guiPage.getSize();
+    private void fillBorder(Inventory inv) {
+        if (inv == null) return;
+
+        int size = inv.getSize();
         int rows = size / 9;
 
         ItemStack pane = new ItemStack(borderMaterial);
@@ -246,15 +247,15 @@ public abstract class AbstractGuiPage implements InventoryHolder {
 
         // Fill top row
         for (int i = 0; i < 9; i++) {
-            if (isEmpty(guiPage, i)) {
-                guiPage.setItem(i, pane);
+            if (isEmpty(inv, i)) {
+                inv.setItem(i, pane);
             }
         }
 
         // Fill bottom row
         for (int i = size - 9; i < size; i++) {
-            if (isEmpty(guiPage, i)) {
-                guiPage.setItem(i, pane);
+            if (isEmpty(inv, i)) {
+                inv.setItem(i, pane);
             }
         }
 
@@ -263,11 +264,11 @@ public abstract class AbstractGuiPage implements InventoryHolder {
             int left = row * 9;
             int right = row * 9 + 8;
 
-            if (isEmpty(guiPage, left)) {
-                guiPage.setItem(left, pane);
+            if (isEmpty(inv, left)) {
+                inv.setItem(left, pane);
             }
-            if (isEmpty(guiPage, right)) {
-                guiPage.setItem(right, pane);
+            if (isEmpty(inv, right)) {
+                inv.setItem(right, pane);
             }
         }
     }
@@ -289,7 +290,7 @@ public abstract class AbstractGuiPage implements InventoryHolder {
 
     @Override
     public Inventory getInventory() {
-        return guiPage;
+        return null;
     }
 
 }
