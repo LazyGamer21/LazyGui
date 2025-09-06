@@ -7,16 +7,32 @@ This is very basic documentation for now, will be updated in the future
 Download the most recent release and put it into your local maven repository
  - Your local maven repo is usually in C:\Users\(user)\.m2\repository\
 
-Once in your local maven repo you can use it in all of your projects easily by just putting the maven dependency into your pom.xml
+Once in your local maven repo you can use it in all of your projects easily by just putting the first maven dependency into your pom.xml
 
+If for some reason it doesn't work from your local maven repository:
+ - create a "libs" folder in the main directory of your project
+ - put the .jar into the libs folder
+ - use the second maven dependency
 
 
  --- Maven Dependency ---
+ use this first dependency if it is in your local maven repo
 ```
 <dependency>
       <groupId>me.ericdavis</groupId>
       <artifactId>LazyGUI</artifactId>
       <version>2.4.0</version> (or whatever version you're using)
+</dependency>
+```
+
+use this second dependency if it is in your "libs" folder
+```
+<dependency>
+    <groupId>me.ericdavis</groupId>
+    <artifactId>LazyGUI</artifactId>
+    <version>2.4.0</version>
+    <scope>system</scope>
+    <systemPath>${project.basedir}/libs/LazyGUI-2.4.0.jar</systemPath>
 </dependency>
 ```
 
