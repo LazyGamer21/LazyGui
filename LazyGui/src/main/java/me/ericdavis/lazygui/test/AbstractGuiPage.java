@@ -81,7 +81,7 @@ public abstract class AbstractGuiPage implements InventoryHolder {
 
     public abstract String getPageIdentifier();
 
-    protected abstract List<GuiItem> getListedButtons();
+    protected abstract List<GuiItem> getListedButtons(UUID playerId);
 
     /**
      *
@@ -180,7 +180,7 @@ public abstract class AbstractGuiPage implements InventoryHolder {
         }
 
         // Now handle the "listed" items that should page
-        List<GuiItem> listed = getListedButtons();
+        List<GuiItem> listed = getListedButtons(playerId);
 
         if (listed == null || listed.isEmpty()) return;
 
