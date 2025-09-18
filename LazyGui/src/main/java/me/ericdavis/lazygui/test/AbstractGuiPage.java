@@ -46,7 +46,6 @@ public abstract class AbstractGuiPage implements InventoryHolder {
     public AbstractGuiPage(JavaPlugin plugin, boolean fillBorder, boolean buttonsFollowListPages)
     {
         this.plugin = plugin;
-        this.displayName = getDisplayName();
         this.rows = getRows();
         this.fillBorder = fillBorder;
         this.autoGenBackButton = false;
@@ -65,7 +64,6 @@ public abstract class AbstractGuiPage implements InventoryHolder {
     public AbstractGuiPage(JavaPlugin plugin, boolean fillBorder, boolean buttonsFollowListPages, String parentPageId, boolean autoGenBackButton)
     {
         this.plugin = plugin;
-        this.displayName = getDisplayName();
         this.rows = getRows();
         this.fillBorder = fillBorder;
         this.autoGenBackButton = autoGenBackButton;
@@ -75,7 +73,7 @@ public abstract class AbstractGuiPage implements InventoryHolder {
         GuiManager.getInstance().registerPage(this, getPageIdentifier());
     }
 
-    protected abstract String getDisplayName();
+    protected abstract String getDisplayName(UUID playerId);
 
     protected abstract int getRows();
 
@@ -94,7 +92,7 @@ public abstract class AbstractGuiPage implements InventoryHolder {
         UUID playerId = player.getUniqueId();
 
         currentPages.put(playerId, 0);
-        this.displayName = getDisplayName();
+        this.displayName = getDisplayName(playerId);
         this.rows = getRows();
 
         createInventory(playerId);
